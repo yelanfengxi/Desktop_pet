@@ -206,6 +206,7 @@ app.whenReady().then(() => {
                 // 立刻应用到底层窗口
                 if (petWindow) {
                     petWindow.setIgnoreMouseEvents(isMousePenetrating, { forward: true });
+                    petWindow.webContents.send('mouse-passthrough-changed', isMousePenetrating);
                 }
             }
         },

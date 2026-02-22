@@ -159,7 +159,7 @@
 
         #chat-input-container.visible {
             opacity: 1;
-            pointer-events: auto;
+            pointer-events: auto !important;
         }
 
         #user-chat-input {
@@ -279,6 +279,8 @@
             display: none;
             flex-direction: column;
             overflow: hidden;
+            pointer-events: auto !important;
+            /* 必须显式写明，因为父级 wrapper 为 none */
         }
 
 
@@ -389,7 +391,8 @@
             right: auto;
             transform: scale(0.95);
             transform-origin: top left;
-            background: rgba(20, 20, 20, 0.85);
+            background: rgba(20, 20, 20, 0.98);
+            /* 强化不透明度以拦截点击 */
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -445,7 +448,8 @@
         #settings-panel.show {
             opacity: 1;
             transform: scale(1);
-            pointer-events: auto;
+            pointer-events: auto !important;
+            /* 强制启用事件 */
         }
 
         /* 任务2： header 里的 h3 标题无边距 */
@@ -615,25 +619,29 @@
         <!-- 阶段4.7: 绝对定位的物理碰撞透明遮罩层 -->
         <div id="hitbox"></div>
 
-        <!-- 悬浮聊天输入框 -->
-        <div id="chat-input-container">
-            <textarea id="user-chat-input" placeholder="和我说点什么吧... (Enter发送)" maxlength="500"
-                autocomplete="off"></textarea>
-            <div class="floating-actions-panel">
-                <button id="history-toggle-btn" class="float-btn" title="开关历史记录">📜</button>
-                <button id="global-pin-btn" class="float-btn" title="固定界面不隐藏">📌</button>
+        <!-- 统一聊天包装层：解决面板间移动失焦隐藏问题 -->
+        <div id="chat-wrapper"
+            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 950;">
+            <!-- 悬浮聊天输入框 -->
+            <div id="chat-input-container">
+                <textarea id="user-chat-input" placeholder="和我说点什么吧... (Enter发送)" maxlength="500"
+                    autocomplete="off"></textarea>
+                <div class="floating-actions-panel">
+                    <button id="history-toggle-btn" class="float-btn" title="开关历史记录">📜</button>
+                    <button id="global-pin-btn" class="float-btn" title="固定界面不隐藏">📌</button>
+                </div>
             </div>
-        </div>
 
-        <!-- 历史聊天记录面板 -->
-        <div id="chat-history-panel">
-            <!-- 顶部标题栏：称呼 + 关闭 -->
-            <div id="chat-panel-header">
-                <span class="panel-title" id="chat-panel-title">后辈</span>
-                <button id="close-chat-panel" title="关闭历史记录">×</button>
+            <!-- 历史聊天记录面板 -->
+            <div id="chat-history-panel">
+                <!-- 顶部标题栏：称呼 + 关闭 -->
+                <div id="chat-panel-header">
+                    <span class="panel-title" id="chat-panel-title">后辈</span>
+                    <button id="close-chat-panel" title="关闭历史记录">×</button>
+                </div>
+                <!-- 消息滚动区 -->
+                <div id="chat-messages-area"></div>
             </div>
-            <!-- 消息滚动区 -->
-            <div id="chat-messages-area"></div>
         </div>
 
         <!-- 核心画布挂载点 -->

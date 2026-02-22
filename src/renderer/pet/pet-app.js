@@ -184,6 +184,7 @@ function setupInteraction() {
     // ==========================================
     const hitbox = document.getElementById('hitbox');
 
+    const chatWrapper = document.getElementById('chat-wrapper');
     const chatInputContainer = document.getElementById('chat-input-container');
     const userChatInput = document.getElementById('user-chat-input');
 
@@ -199,7 +200,7 @@ function setupInteraction() {
     let hideChatBoxTimer = null;
 
     // 受保护的 UI 面板集合，鼠标在此家族内跳转不视为"离开"
-    const uiFamily = [hitbox, settingsPanelEl, chatHistoryPanelEl, chatInputContainer].filter(Boolean);
+    const uiFamily = [hitbox, settingsPanelEl, chatWrapper].filter(Boolean);
 
     // 判断一个元素是否属于 UI "家族"
     function isInUIFamily(el) {
@@ -236,12 +237,26 @@ function setupInteraction() {
         ipcRenderer.send('enable-mouse-events');
     });
 
+    let isGlobalPassthrough = false;
+    ipcRenderer.on('mouse-passthrough-changed', (e, isPassthrough) => {
+        isGlobalPassthrough = isPassthrough;
+        console.log('[Debug] 收到主进程鼠标穿透状态更改:', isGlobalPassthrough);
+        if (isGlobalPassthrough) {
+            forceHideAllUI();
+        }
+    });
+
     uiFamily.forEach(el => {
         el.addEventListener('mouseenter', () => {
-            // 如果设置面板处于打开状态，强行阻断其它 UI 弹出的行为
+            // 全局穿透期间，禁止一切 UI 唤醒，彻底变成桌布
+            if (isGlobalPassthrough) return;
+
+            // 无论如何，只要摸到交互家族（尤其是 Hitbox），第一时间开启鼠标穿透拦截，让模型可交互
+            enableMouse();
+
+            // 如果设置面板处于打开状态，强行阻断其它 UI（如聊天气泡、历史记录）弹出的行为
             if (isSettingsOpen) return;
 
-            enableMouse();
             // 取消正在进行的隐藏倒计时
             if (hideChatBoxTimer) { clearTimeout(hideChatBoxTimer); hideChatBoxTimer = null; }
             if (showChatBoxTimer) return; // 已经在等待显示了
@@ -313,10 +328,16 @@ function setupInteraction() {
     }
 
     // 初始化历史面板显隐状态（不再需要固定输入框，因为受隐藏计时器控制）
-    if (localStorage.getItem('pet_isHistoryVisible') === 'true') {
+    // 修改：如果未设置过状态，默认不显示（false）
+    const isHistoryVisibleStr = localStorage.getItem('pet_isHistoryVisible');
+    const isHistoryVisible = isHistoryVisibleStr === 'true'; // 如果是 undefined/null，则为 false
+
+    if (isHistoryVisible) {
         chatHistoryPanel.style.display = 'flex';
     } else {
         chatHistoryPanel.style.display = 'none';
+        // 同步存入 localStorage 建立初始默认状态
+        localStorage.setItem('pet_isHistoryVisible', 'false');
     }
 
     // 📜 历史面板开关按钮（仅操作面板显隐，与图钉解绑）
@@ -569,6 +590,19 @@ function setupAISettingsAndTriggers() {
     const stealthAutoCheckbox = document.getElementById('setting-stealth-auto');
     if (stealthAutoCheckbox) {
         stealthAutoCheckbox.checked = localStorage.getItem('pet_stealthAutoChat') === 'true';
+
+        // 动态绑定 change 事件，实时响应勾选状态
+        stealthAutoCheckbox.addEventListener('change', () => {
+            const isStealth = stealthAutoCheckbox.checked;
+            localStorage.setItem('pet_stealthAutoChat', isStealth ? 'true' : 'false');
+
+            const autoMsgs = document.querySelectorAll('.history-msg.is-auto');
+            autoMsgs.forEach(msg => {
+                msg.style.display = isStealth ? 'none' : 'block';
+            });
+
+            console.log(`[Debug] 隐身模式已动态切换为: ${isStealth}`);
+        });
     }
 
     // 新增：初始化灵魂配置
@@ -760,6 +794,10 @@ function setupAISettingsAndTriggers() {
 
     // 防止点击面板里面时触发穿透或者关闭
     if (settingsPanel) {
+        // [任务1修复] 阻止设置面板内部点击事件冒泡到底层，防止触发背景拖拽或失焦
+        settingsPanel.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+        });
         settingsPanel.addEventListener('mouseenter', () => ipcRenderer.send('enable-mouse-events'));
     }
 
@@ -799,7 +837,7 @@ function setupAISettingsAndTriggers() {
                 if (chatPanelTitle) chatPanelTitle.textContent = newNickname;
             }
 
-            // 保存隐身模式
+            // 保存隐身模式（仅保底写库，显隐逻辑已独立）
             if (stealthAutoCheckbox) {
                 localStorage.setItem('pet_stealthAutoChat', stealthAutoCheckbox.checked ? 'true' : 'false');
             }
@@ -997,14 +1035,9 @@ async function askAI(base64Image, userText = null, isAuto = false) {
     // 记忆归档（始终写入，保持 AI 上下文完整）
     chatHistory.push({ role: 'user', content: currentPrompt });
     chatHistory.push({ role: 'assistant', content: reply });
-    // 显示到历史面板的逻辑：
-    // - 手动对话始终显示
-    // - 自动巡检：如果用户勾选了"隐藏自动截屏记录"则不显示
-    const stealthMode = localStorage.getItem('pet_stealthAutoChat') === 'true';
-    if (!isAuto || !stealthMode) {
-        updateChatHistoryUI('user', currentPrompt);
-        updateChatHistoryUI('assistant', reply);
-    }
+    // [重要更正] 始终渲染到 UI，由 CSS 逻辑决定是否显现
+    updateChatHistoryUI('user', currentPrompt, isAuto);
+    updateChatHistoryUI('assistant', reply, isAuto);
     // 滑动窗口裁剪
     if (chatHistory.length > MAX_HISTORY * 2) {
         chatHistory = chatHistory.slice(-MAX_HISTORY);
@@ -1017,15 +1050,24 @@ async function askAI(base64Image, userText = null, isAuto = false) {
 /**
  * 动态渲染历史聊天记录面板
  */
-function updateChatHistoryUI(role, content) {
-    // 任务3：拦截系统提示词，防止泄露到 UI
-    if (content && content.includes('你现在是一个傲娇可爱')) return;
+function updateChatHistoryUI(role, content, isAuto = false) {
+    // 【核心修复】：如果是自动触发的轮询，它的 Prompt（发给 AI 的内置提示词）
+    // 永远不应该出现在 UI 聊天记录里让用户看到，因此直接物理拦截。
+    if (isAuto && role === 'user') return;
 
     const panel = document.getElementById('chat-messages-area');
     if (!panel) return;
 
     const bubble = document.createElement('div');
     bubble.className = `history-msg ${role}`;
+    if (isAuto) {
+        bubble.classList.add('is-auto');
+        // 根据当前的设置决定初始显隐状态
+        const stealthMode = localStorage.getItem('pet_stealthAutoChat') === 'true';
+        if (stealthMode) {
+            bubble.style.display = 'none';
+        }
+    }
     bubble.textContent = content;
     panel.appendChild(bubble);
 
