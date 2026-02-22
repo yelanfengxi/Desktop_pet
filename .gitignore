@@ -4,5 +4,7 @@ node_modules/
 .DS_Store
 dist/
 build/
+release/
 .vscode/
 .idea/
+*.ico
