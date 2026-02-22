@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:;">
+    <title>Live2D Pet</title>
+    <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: transparent;
+        }
+
+        #pet-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            /* 子元素绝对定位基准 */
+        }
+
+        /* -----------------------
+           对话气泡 UI (Chat Bubble) 
+           ----------------------- */
+        #chat-bubble {
+            position: absolute;
+            top: 10%;
+            right: 5%;
+            /* 最大宽度：防止无限展宽 */
+            max-width: 250px;
+            /* 高度自动适应内容 */
+            height: auto;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 16px;
+            padding: 10px 14px;
+
+            /* 字体排版 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+            /* 允许多行进行迭代換行 */
+            word-wrap: break-word;
+            white-space: pre-wrap;
+
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+            opacity: 0;
+            transform: translateY(10px) scale(0.95);
+            transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* 气泡显示状态类 */
+        #chat-bubble.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* 气泡的尾巴小三角 */
+        #chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 24px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(255, 255, 255, 0.85);
+        }
+
+        /* -----------------------
+           阶段4.7: 绝对物理碰撞遮罩层 (DOM Hitbox)
+           ----------------------- */
+        #hitbox {
+            position: absolute;
+            width: 200px;
+            height: 300px;
+            left: 75%;
+            top: 65%;
+            transform: translate(-50%, -50%);
+            z-index: 900;
+            cursor: grab;
+            /* 任务5：隐形结界，调试框已移除 */
+            border: none;
+            background-color: transparent;
+        }
+
+        #hitbox:active {
+            cursor: grabbing;
+        }
+
+        /* 关闭按鈕 */
+        .panel-close-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 18px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            color: #8a9bae;
+            font-size: 13px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 0;
+            transition: color 0.15s, background 0.15s;
+        }
+
+        .panel-close-btn:hover {
+            color: #e0e0e0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* -----------------------
+           任务1：独立分离但联动的输入框
+           ----------------------- */
+        #chat-input-container {
+            position: absolute;
+            bottom: 20px;
+            left: 10px;
+            width: 240px;
+            z-index: 960;
+            display: flex;
+            align-items: flex-end;
+            /* 底部对齐，以支持自适应高度向上生长 */
+            gap: 5px;
+            padding: 6px 8px;
+            background: rgba(10, 10, 20, 0.4);
+            border-radius: 12px;
+            box-sizing: border-box;
+            border: 1px solid rgba(100, 180, 255, 0.2);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            /* 默认状态隐藏，由 .visible 类控制显示 */
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        #chat-input-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #user-chat-input {
+            flex: 1;
+            min-width: 0;
+            box-sizing: border-box;
+            background: rgba(20, 20, 35, 0.82);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 180, 255, 0.4);
+            border-radius: 12px;
+            padding: 7px 10px;
+            color: #e8f4ff;
+            font-size: 13px;
+            outline: none;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            caret-color: #6ec6f5;
+            transition: border-color 0.2s, background 0.2s;
+            resize: none;
+            overflow-y: hidden;
+            min-height: 32px;
+            /* 差不多一行的总高度 */
+            max-height: 120px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+
+        /* 隐藏输入框原生滚动条，保持清爽 */
+        #user-chat-input::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        #user-chat-input::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #user-chat-input::-webkit-scrollbar-thumb {
+            background: rgba(100, 180, 255, 0.25);
+            border-radius: 3px;
+        }
+
+        #user-chat-input::placeholder {
+            color: rgba(180, 210, 240, 0.45);
+            line-height: 1.4;
+        }
+
+        #user-chat-input:focus {
+            border-color: rgba(110, 198, 245, 0.8);
+            box-shadow: 0 0 12px rgba(110, 198, 245, 0.25);
+        }
+
+        /*悬浮图标组容器*/
+        .floating-actions-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+        /* 统一圆形按钮样式 */
+        .float-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: rgba(20, 20, 35, 0.82);
+            border: 1px solid rgba(100, 180, 255, 0.35);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .float-btn:hover {
+            background: rgba(70, 130, 200, 0.35);
+            color: #fff;
+        }
+
+        /* 历史记录开关按钮 */
+        #history-toggle-btn {
+            color: #8abde6;
+            font-size: 14px;
+        }
+
+        /* 全局图钉按钮 */
+        #global-pin-btn {
+            color: #4a6a8a;
+            font-size: 12px;
+        }
+
+        #global-pin-btn.active {
+            color: #6ec6f5;
+            background: rgba(100, 180, 255, 0.15);
+            border-color: rgba(100, 180, 255, 0.6);
+            box-shadow: 0 0 8px rgba(100, 180, 255, 0.3);
+        }
+
+        /* -----------------------
+           历史聊天记录面板（任务1：分离后高度自适应调整）
+           ----------------------- */
+        #chat-history-panel {
+            position: absolute;
+            left: 10px;
+            bottom: 74px;
+            /* 留出输入框大约 44px 的高度 + gap */
+            width: 240px;
+            height: 330px;
+            background: rgba(15, 15, 25, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(100, 180, 255, 0.2);
+            border-radius: 12px;
+            box-sizing: border-box;
+            z-index: 960;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+
+
+        /* 顶部标题栏（可拖拽把手） */
+        #chat-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: rgba(40, 60, 100, 0.6);
+            border-bottom: 1px solid rgba(100, 180, 255, 0.15);
+            border-radius: 12px 12px 0 0;
+            cursor: move;
+            /* 任务3：拖拽手型 */
+            flex-shrink: 0;
+            user-select: none;
+            -webkit-app-region: drag;
+            /* 允许拖拽窗口 */
+        }
+
+        #chat-panel-header .panel-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #a8ccee;
+            letter-spacing: 0.04em;
+        }
+
+        #close-chat-panel {
+            width: 18px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            color: #6a8aaa;
+            font-size: 15px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 3px;
+            padding: 0;
+            transition: color 0.15s, background 0.15s;
+            -webkit-app-region: no-drag;
+            /* 防止按钮无法点击 */
+        }
+
+        #close-chat-panel:hover {
+            color: #e0e0e0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 消息滚动区（任务1） */
+        #chat-messages-area {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 8px 10px;
+            word-wrap: break-word;
+        }
+
+        /* 消息区滚动条美化 */
+        #chat-messages-area::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        #chat-messages-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat-messages-area::-webkit-scrollbar-thumb {
+            background: rgba(100, 180, 255, 0.25);
+            border-radius: 3px;
+        }
+
+        /* 历史气泡 */
+        .history-msg {
+            max-width: 90%;
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .history-msg.user {
+            align-self: flex-end;
+            background: rgba(70, 130, 220, 0.4);
+            color: #d4e8ff;
+            border-bottom-right-radius: 3px;
+        }
+
+        .history-msg.assistant {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            color: #c8d8ea;
+            border-bottom-left-radius: 3px;
+        }
+
+        /* -----------------------
+           AI 配置面板 UI (Settings Panel) - 极限小屏幕版
+           ----------------------- */
+        #settings-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: auto;
+            transform: scale(0.95);
+            transform-origin: top left;
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom-right-radius: 8px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 0;
+            width: 200px;
+            /* 任务2：flex 分层，面板整体不滚动 */
+            max-height: 420px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 2px 2px 15px rgba(0, 0, 0, 0.6);
+            color: #eee;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 9999 !important;
+        }
+
+        /* 任务2：固定顶部 header */
+        .settings-header {
+            flex-shrink: 0;
+            position: relative;
+            padding: 10px 12px 9px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(20, 20, 20, 0.98);
+        }
+
+        /* 任务2：可滚动内容区 */
+        .settings-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 12px 12px;
+        }
+
+        /* 内容区滚动条美化 */
+        .settings-content::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .settings-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .settings-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 3px;
+        }
+
+        #settings-panel.show {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* 任务2： header 里的 h3 标题无边距 */
+        .settings-header h3 {
+            margin: 0 0 0 0;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: left;
+            color: #fff;
+            padding-right: 20px;
+            /* 组断关闭按钮占位 */
+        }
+
+        /* 区块内小标题 */
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #6a7a90;
+            /* 柔和的蓝灰色，克制又高级 */
+            margin: 0 0 7px 0;
+        }
+
+        /* 分隔线：比标题更淡，用于视觉断层 */
+        .section-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            margin: 10px 0;
+        }
+
+        .setting-group {
+            margin-bottom: 7px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .setting-group label {
+            font-size: 11px;
+            margin-bottom: 3px;
+            color: #8a9bae;
+        }
+
+        .setting-group input {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+            padding: 4px 7px;
+            color: #e8eaed;
+            font-size: 11px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .setting-group input:focus {
+            border-color: #4a90e2;
+        }
+
+        /* 横排小参数对 */
+        .flex-row-group {
+            display: flex;
+            gap: 7px;
+        }
+
+        .settings-btn {
+            margin-top: 11px;
+            width: 100%;
+            padding: 6px;
+            background: #3a7bd5;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .settings-btn:hover {
+            background: #2a63b5;
+        }
+
+        /* 模型路径行：内嵌选择按钮 */
+        #model-path-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        #model-path-input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #select-folder-btn {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            background: rgba(60, 80, 120, 0.7);
+            border: 1px solid rgba(100, 180, 255, 0.3);
+            border-radius: 4px;
+            color: #8abde6;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        #select-folder-btn:hover {
+            background: rgba(70, 130, 200, 0.5);
+            color: #fff;
+        }
+
+        /* 任务5：API 测试按钮与结果 */
+        #test-api-btn {
+            margin-top: 8px;
+            width: 100%;
+            padding: 5px;
+            background: rgba(50, 120, 80, 0.3);
+            border: 1px solid rgba(80, 200, 120, 0.4);
+            border-radius: 4px;
+            color: #aee6c0;
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        #test-api-btn:hover {
+            background: rgba(50, 120, 80, 0.6);
+            color: #fff;
+        }
+
+        #test-api-result {
+            display: block;
+            margin-top: 4px;
+            font-size: 10px;
+            text-align: center;
+            min-height: 14px;
+        }
+
+        /* 任务6：重置位置按钮 */
+        #reset-chat-pos {
+            margin-top: 5px;
+            width: 100%;
+            padding: 4px;
+            background: rgba(60, 80, 120, 0.5);
+            border: 1px solid rgba(100, 180, 255, 0.25);
+            border-radius: 4px;
+            color: #8abde6;
+            font-size: 10px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        #reset-chat-pos:hover {
+            background: rgba(70, 130, 200, 0.45);
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="pet-container">
+        <!-- 阶段4.7: 绝对定位的物理碰撞透明遮罩层 -->
+        <div id="hitbox"></div>
+
+        <!-- 悬浮聊天输入框 -->
+        <div id="chat-input-container">
+            <textarea id="user-chat-input" placeholder="和我说点什么吧... (Enter发送)" maxlength="500"
+                autocomplete="off"></textarea>
+            <div class="floating-actions-panel">
+                <button id="history-toggle-btn" class="float-btn" title="开关历史记录">📜</button>
+                <button id="global-pin-btn" class="float-btn" title="固定界面不隐藏">📌</button>
+            </div>
+        </div>
+
+        <!-- 历史聊天记录面板 -->
+        <div id="chat-history-panel">
+            <!-- 顶部标题栏：称呼 + 关闭 -->
+            <div id="chat-panel-header">
+                <span class="panel-title" id="chat-panel-title">后辈</span>
+                <button id="close-chat-panel" title="关闭历史记录">×</button>
+            </div>
+            <!-- 消息滚动区 -->
+            <div id="chat-messages-area"></div>
+        </div>
+
+        <!-- 核心画布挂载点 -->
+        <div id="canvas-wrapper"></div>
+        <!-- 对话气泡 -->
+        <div id="chat-bubble" class="">暂无内容...</div>
+
+        <!-- 配置面板 -->
+        <div id="settings-panel">
+            <!-- 任务3：设置面板固定顶部 header，cursor:move 支持拖拽 -->
+            <div class="settings-header" style="cursor:move;">
+                <button class="panel-close-btn" id="panel-close-btn" title="关闭">✕</button>
+                <h3>⚙️ 桌宠 AI 配置</h3>
+            </div>
+
+            <!-- 任务2：可滚动内容区 -->
+            <div class="settings-content">
+                <!-- 区块一：核心 API 配置 -->
+                <p class="section-title">🔌 核心 API 设置</p>
+                <div class="setting-group">
+                    <label>Base URL</label>
+                    <input type="text" id="ai-url" placeholder="https://api.siliconflow.cn/v1/...">
+                </div>
+                <div class="setting-group">
+                    <label>API Key</label>
+                    <input type="password" id="ai-key" placeholder="sk-...">
+                </div>
+                <div class="setting-group">
+                    <label>Model Name</label>
+                    <input type="text" id="ai-model" placeholder="Qwen/Qwen2.5-VL-72B-Instruct">
+                </div>
+                <button id="test-api-btn">📡 测试 API 连接</button>
+                <span id="test-api-result"></span>
+
+                <hr class="section-divider">
+
+                <!-- 区块二：自动化与控制 -->
+                <p class="section-title">⏱ 自动化控制</p>
+                <div class="flex-row-group">
+                    <div class="setting-group" style="flex:1">
+                        <label>扫描频率(秒)</label>
+                        <input type="number" id="setting-interval" placeholder="60" min="10" max="3600">
+                    </div>
+                    <div class="setting-group" style="flex:1">
+                        <label>最大 Token</label>
+                        <input type="number" id="setting-tokens" placeholder="50" min="10" max="500">
+                    </div>
+                </div>
+
+                <label
+                    style="display:flex;align-items:center;gap:6px;font-size:11px;color:#8a9bae;cursor:pointer;user-select:none;margin-top:6px;">
+                    <input type="checkbox" id="setting-stealth-auto" style="accent-color:#4a90e2;">
+                    隐藏自动截屏的聊天记录
+                </label>
+
+                <hr class="section-divider">
+
+                <!-- 区块三：记忆与体验 -->
+                <p class="section-title">🧠 记忆增强</p>
+                <label
+                    style="display:flex;align-items:center;gap:6px;font-size:11px;color:#8a9bae;cursor:pointer;user-select:none;">
+                    <input type="checkbox" id="setting-memory" style="accent-color:#4a90e2;">
+                    开启滚动窗口记忆
+                </label>
+                <div class="setting-group" style="margin-top:6px;">
+                    <label>记忆保留条数 (2-30)</label>
+                    <input type="number" id="setting-memory-count" placeholder="6" min="2" max="30">
+                </div>
+
+                <hr class="section-divider">
+
+                <!-- 区块四：灵魂配置 -->
+                <p class="section-title">🧠 灵魂配置</p>
+                <div class="setting-group">
+                    <label>称呼我为</label>
+                    <input type="text" id="setting-user-name" placeholder="前辈" maxlength="10">
+                </div>
+                <div class="setting-group">
+                    <label>AI 身份 / 语气设定</label>
+                    <textarea id="setting-system-prompt" rows="3"
+                        style="background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:4px 7px;color:#e8eaed;font-size:11px;outline:none;resize:vertical;width:100%;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif;min-height:50px;max-height:120px;"
+                        placeholder="你是一个傲娇可爱的桌面二次元宠物。请用简短的中文回复，风格活泼俘皮。"></textarea>
+                </div>
+
+                <hr class="section-divider">
+
+                <!-- 区块五：个性化 -->
+                <p class="section-title">✨ 个性化</p>
+                <div class="setting-group">
+                    <label>AI 称呼（聊天窗口标题）</label>
+                    <input type="text" id="ai-nickname" placeholder="后辈" maxlength="10">
+                </div>
+                <button id="reset-chat-pos">📌 重置聊天窗口位置</button>
+
+                <hr class="section-divider">
+
+                <!-- 区块五：模型路径 -->
+                <p class="section-title">📁 模型路径</p>
+                <div class="setting-group">
+                    <label>Live2D 文件夹路径</label>
+                    <div id="model-path-row">
+                        <input type="text" id="model-path-input" placeholder="留空则使用默认模型">
+                        <button id="select-folder-btn" title="选择文件夹">…</button>
+                    </div>
+                </div>
+
+                <button class="settings-btn" id="save-settings-btn">保存并应用</button>
+            </div>
+        </div>
+    </div>
+    <script src="./pet-app.js"></script>
+</body>
+
+</html>

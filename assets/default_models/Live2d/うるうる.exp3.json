@@ -1,0 +1,55 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "Param_cheek",
+            "Value": "0.58576",
+            "Blend": "Add"
+        },
+        {
+            "Id": "Param_eye_uru",
+            "Value": "0.85731",
+            "Blend": "Add"
+        },
+        {
+            "Id": "Param_tear",
+            "Value": "1",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_Y",
+            "Value": "-0.00776",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_Y",
+            "Value": "0",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_FORM",
+            "Value": "-0.64395",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_FORM",
+            "Value": "-0.62843",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_ANGLE",
+            "Value": "0.48878",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_ANGLE",
+            "Value": "0.49654",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_MOUTH_FORM",
+            "Value": "-1.12497",
+            "Blend": "Add"
+        }
+    ]
+}

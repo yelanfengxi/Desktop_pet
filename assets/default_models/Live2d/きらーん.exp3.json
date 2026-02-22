@@ -1,0 +1,45 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "Param_eye_shitake",
+            "Value": "1",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_Y",
+            "Value": "0.38792",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_Y",
+            "Value": "0.63619",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_FORM",
+            "Value": "-0.33361",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_FORM",
+            "Value": "-0.38792",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_ANGLE",
+            "Value": "-0.65947",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_ANGLE",
+            "Value": "-0.52757",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_MOUTH_FORM",
+            "Value": "-0.05431",
+            "Blend": "Add"
+        }
+    ]
+}

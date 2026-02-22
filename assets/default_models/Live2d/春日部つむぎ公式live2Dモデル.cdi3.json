@@ -1,0 +1,437 @@
+{
+	"Version": 3,
+	"Parameters": [
+		{
+			"Id": "PARAM_BREATH",
+			"GroupId": "ParamGroup",
+			"Name": "呼吸"
+		},
+		{
+			"Id": "PARAM_ANGLE_Z",
+			"GroupId": "ParamGroup",
+			"Name": "角度 Z"
+		},
+		{
+			"Id": "PARAM_ANGLE_X",
+			"GroupId": "ParamGroup",
+			"Name": "角度 X"
+		},
+		{
+			"Id": "PARAM_ANGLE_Y",
+			"GroupId": "ParamGroup",
+			"Name": "角度 Y"
+		},
+		{
+			"Id": "PARAM_BODY_ANGLE_X",
+			"GroupId": "ParamGroup",
+			"Name": "体の回転　X"
+		},
+		{
+			"Id": "PARAM_BODY_ANGLE_Z",
+			"GroupId": "ParamGroup",
+			"Name": "体の回転　Z"
+		},
+		{
+			"Id": "PARAM_ARM_L",
+			"GroupId": "ParamGroup",
+			"Name": "左腕"
+		},
+		{
+			"Id": "PARAM_ARM_R",
+			"GroupId": "ParamGroup",
+			"Name": "右腕"
+		},
+		{
+			"Id": "Param_cheek",
+			"GroupId": "ParamGroup11",
+			"Name": "頬染め"
+		},
+		{
+			"Id": "Param_eye_shitake",
+			"GroupId": "ParamGroup11",
+			"Name": "目 キラキラ"
+		},
+		{
+			"Id": "Param_eye_uru",
+			"GroupId": "ParamGroup11",
+			"Name": "目 うるうる"
+		},
+		{
+			"Id": "Param_tear",
+			"GroupId": "ParamGroup11",
+			"Name": "目 涙"
+		},
+		{
+			"Id": "Param_eye_small",
+			"GroupId": "ParamGroup11",
+			"Name": "目 瞳小"
+		},
+		{
+			"Id": "PARAM_BROW_L_Y",
+			"GroupId": "ParamGroup3",
+			"Name": "左眉　上下"
+		},
+		{
+			"Id": "PARAM_BROW_R_Y",
+			"GroupId": "ParamGroup3",
+			"Name": "右眉　上下"
+		},
+		{
+			"Id": "PARAM_BROW_L_FORM",
+			"GroupId": "ParamGroup3",
+			"Name": "左眉 変形"
+		},
+		{
+			"Id": "PARAM_BROW_R_FORM",
+			"GroupId": "ParamGroup3",
+			"Name": "右眉 変形"
+		},
+		{
+			"Id": "PARAM_BROW_L_ANGLE",
+			"GroupId": "ParamGroup3",
+			"Name": "左眉 角度"
+		},
+		{
+			"Id": "PARAM_BROW_R_ANGLE",
+			"GroupId": "ParamGroup3",
+			"Name": "右眉 角度"
+		},
+		{
+			"Id": "PARAM_EYE_L_OPEN",
+			"GroupId": "ParamGroup2",
+			"Name": "左眼　開閉"
+		},
+		{
+			"Id": "PARAM_EYE_R_OPEN",
+			"GroupId": "ParamGroup2",
+			"Name": "右眼　開閉"
+		},
+		{
+			"Id": "PARAM_EYE_BALL_X",
+			"GroupId": "ParamGroup2",
+			"Name": "目玉 X"
+		},
+		{
+			"Id": "PARAM_EYE_BALL_Y",
+			"GroupId": "ParamGroup2",
+			"Name": "目玉 Y"
+		},
+		{
+			"Id": "Param_highlight",
+			"GroupId": "ParamGroup2",
+			"Name": "ハイライト揺れ"
+		},
+		{
+			"Id": "PARAM_MOUTH_FORM",
+			"GroupId": "ParamGroup4",
+			"Name": "口　変形"
+		},
+		{
+			"Id": "PARAM_MOUTH_OPEN_Y",
+			"GroupId": "ParamGroup4",
+			"Name": "口　開閉"
+		},
+		{
+			"Id": "PARAM_HAIR_FRONT",
+			"GroupId": "ParamGroup5",
+			"Name": "髪揺れ　前"
+		},
+		{
+			"Id": "PARAM_HAIR_SIDE",
+			"GroupId": "ParamGroup5",
+			"Name": "髪揺れ　横"
+		},
+		{
+			"Id": "Param_x1",
+			"GroupId": "ParamGroup6",
+			"Name": "x1"
+		},
+		{
+			"Id": "Param_x2",
+			"GroupId": "ParamGroup6",
+			"Name": "x2"
+		},
+		{
+			"Id": "Param_y1",
+			"GroupId": "ParamGroup6",
+			"Name": "y1"
+		},
+		{
+			"Id": "Param_y2",
+			"GroupId": "ParamGroup6",
+			"Name": "y2"
+		},
+		{
+			"Id": "Param_side_x1",
+			"GroupId": "ParamGroup7",
+			"Name": "サイドx1"
+		},
+		{
+			"Id": "Param_side_x2",
+			"GroupId": "ParamGroup7",
+			"Name": "サイドx2"
+		},
+		{
+			"Id": "Param_side_x3",
+			"GroupId": "ParamGroup7",
+			"Name": "サイドy1"
+		},
+		{
+			"Id": "Param_side_x4",
+			"GroupId": "ParamGroup7",
+			"Name": "サイドy2"
+		},
+		{
+			"Id": "Param_side_pyoko",
+			"GroupId": "ParamGroup7",
+			"Name": "サイドぴょこ"
+		},
+		{
+			"Id": "Param_back_x",
+			"GroupId": "ParamGroup8",
+			"Name": "後ろx1"
+		},
+		{
+			"Id": "Param_back_x2",
+			"GroupId": "ParamGroup8",
+			"Name": "後ろx2"
+		},
+		{
+			"Id": "Param_back_y1",
+			"GroupId": "ParamGroup8",
+			"Name": "後ろy1"
+		},
+		{
+			"Id": "Param_back_y2",
+			"GroupId": "ParamGroup8",
+			"Name": "後ろy2"
+		},
+		{
+			"Id": "Param_back_yure",
+			"GroupId": "ParamGroup8",
+			"Name": "後頭部揺れ"
+		},
+		{
+			"Id": "Param_ahoge",
+			"GroupId": "ParamGroup8",
+			"Name": "アホ毛"
+		},
+		{
+			"Id": "Param_sweater_r",
+			"GroupId": "ParamGroup9",
+			"Name": "右セーター揺れ"
+		},
+		{
+			"Id": "Param_sweater_l",
+			"GroupId": "ParamGroup9",
+			"Name": "左セーター揺れ"
+		},
+		{
+			"Id": "Param_skirt",
+			"GroupId": "ParamGroup9",
+			"Name": "スカート揺れ"
+		},
+		{
+			"Id": "Param_shirt",
+			"GroupId": "ParamGroup9",
+			"Name": "シャツ揺れ"
+		},
+		{
+			"Id": "Param_necktie",
+			"GroupId": "ParamGroup10",
+			"Name": "ネクタイ揺れ"
+		},
+		{
+			"Id": "Param_necklace",
+			"GroupId": "ParamGroup10",
+			"Name": "ネックレス揺れ"
+		},
+		{
+			"Id": "Param_charm",
+			"GroupId": "ParamGroup10",
+			"Name": "勾玉揺れ"
+		},
+		{
+			"Id": "Param_eri",
+			"GroupId": "ParamGroup10",
+			"Name": "襟揺れ"
+		}
+	],
+	"ParameterGroups": [
+		{
+			"Id": "ParamGroup",
+			"GroupId": "",
+			"Name": "全体"
+		},
+		{
+			"Id": "ParamGroup11",
+			"GroupId": "",
+			"Name": "表情パーツ"
+		},
+		{
+			"Id": "ParamGroup3",
+			"GroupId": "",
+			"Name": "眉"
+		},
+		{
+			"Id": "ParamGroup2",
+			"GroupId": "",
+			"Name": "目"
+		},
+		{
+			"Id": "ParamGroup4",
+			"GroupId": "",
+			"Name": "口"
+		},
+		{
+			"Id": "ParamGroup5",
+			"GroupId": "",
+			"Name": "髪"
+		},
+		{
+			"Id": "ParamGroup6",
+			"GroupId": "",
+			"Name": "もみあげ"
+		},
+		{
+			"Id": "ParamGroup7",
+			"GroupId": "",
+			"Name": "サイドテール"
+		},
+		{
+			"Id": "ParamGroup8",
+			"GroupId": "",
+			"Name": "後ろ髪"
+		},
+		{
+			"Id": "ParamGroup9",
+			"GroupId": "",
+			"Name": "服"
+		},
+		{
+			"Id": "ParamGroup10",
+			"GroupId": "",
+			"Name": "服(小物)"
+		}
+	],
+	"Parts": [
+		{
+			"Id": "Part16",
+			"Name": "体部分"
+		},
+		{
+			"Id": "PARTS_01_BODY",
+			"Name": "体"
+		},
+		{
+			"Id": "PARTS_01_NECK",
+			"Name": "首"
+		},
+		{
+			"Id": "PARTS_01_HAIR_BACK_001",
+			"Name": "後ろ髪"
+		},
+		{
+			"Id": "PARTS_01_HAIR_SIDE_001",
+			"Name": "横髪"
+		},
+		{
+			"Id": "PARTS_01_HAIR_FRONT_001",
+			"Name": "前髪"
+		},
+		{
+			"Id": "PARTS_01_EAR_001",
+			"Name": "耳"
+		},
+		{
+			"Id": "PARTS_01_NOSE_001",
+			"Name": "鼻"
+		},
+		{
+			"Id": "PARTS_01_MOUTH_001",
+			"Name": "口"
+		},
+		{
+			"Id": "PARTS_01_BROW_001",
+			"Name": "まゆ毛"
+		},
+		{
+			"Id": "PARTS_01_EYE_BALL_001",
+			"Name": "目玉"
+		},
+		{
+			"Id": "PARTS_01_EYE_001",
+			"Name": "目"
+		},
+		{
+			"Id": "PARTS_01_FACE_001",
+			"Name": "顔"
+		},
+		{
+			"Id": "PartSketch0",
+			"Name": "[ 下絵 ]"
+		},
+		{
+			"Id": "Part19",
+			"Name": "顔"
+		},
+		{
+			"Id": "Part22",
+			"Name": "服"
+		},
+		{
+			"Id": "Part26",
+			"Name": "身体"
+		},
+		{
+			"Id": "Part24",
+			"Name": "ネクタイ"
+		},
+		{
+			"Id": "Part25",
+			"Name": "セーター"
+		},
+		{
+			"Id": "Part27",
+			"Name": "脚"
+		}
+	],
+	"CombinedParameters": [
+		[
+			"PARAM_ANGLE_X",
+			"PARAM_ANGLE_Y"
+		],
+		[
+			"PARAM_EYE_BALL_X",
+			"PARAM_EYE_BALL_Y"
+		],
+		[
+			"PARAM_MOUTH_FORM",
+			"PARAM_MOUTH_OPEN_Y"
+		],
+		[
+			"Param_x1",
+			"Param_x2"
+		],
+		[
+			"Param_y1",
+			"Param_y2"
+		],
+		[
+			"Param_side_x1",
+			"Param_side_x2"
+		],
+		[
+			"Param_side_x3",
+			"Param_side_x4"
+		],
+		[
+			"Param_back_x",
+			"Param_back_x2"
+		],
+		[
+			"Param_back_y1",
+			"Param_back_y2"
+		]
+	]
+}

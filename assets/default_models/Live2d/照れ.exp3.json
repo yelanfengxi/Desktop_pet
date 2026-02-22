@@ -1,0 +1,35 @@
+{
+    "Type": "Live2D Expression",
+    "Parameters": [
+        {
+            "Id": "Param_cheek",
+            "Value": "0.58188",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_Y",
+            "Value": "-0.54309",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_Y",
+            "Value": "-0.07758",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_L_FORM",
+            "Value": "-0.43447",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_BROW_R_FORM",
+            "Value": "-0.56637",
+            "Blend": "Add"
+        },
+        {
+            "Id": "PARAM_MOUTH_FORM",
+            "Value": "-0.42671",
+            "Blend": "Add"
+        }
+    ]
+}
