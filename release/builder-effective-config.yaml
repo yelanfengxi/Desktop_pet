@@ -1,0 +1,25 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.yourname.desktop_pet
+productName: Desktop_pet
+win:
+  target: portable
+  icon: app-icon.png
+files:
+  - filter:
+      - main.js
+      - package.json
+      - src/**/*
+      - assets/**/*
+      - node_modules/**/*
+      - '!node_modules/**/README*'
+      - '!node_modules/**/*.md'
+      - '!**/*.log'
+      - '!convert-icon.js'
+      - '!walkthrough.md'
+      - '!*.png'
+      - '!*.jpg'
+      - '!*.ico'
+npmRebuild: false
+electronVersion: 40.6.0

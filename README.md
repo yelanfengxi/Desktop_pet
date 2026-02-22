@@ -12,7 +12,8 @@
 
 ## ✨ 项目简介与特性
 
-**本项目由Antigravity/Trae纯AI开发**
+1. 本项目参考 https://github.com/x380kkm/Live2DPet 开发
+2. 本项目由Antigravity/trae纯AI开发
 
 Live2DPet 是一个基于 Electron 与 PixiJS 构建的原生桌面引擎，它不仅仅是一个能在屏幕上走动卖萌的 Live2D 纸片人，更是一个**拥有“视觉”的 AI 助手**。
 

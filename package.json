@@ -5,7 +5,35 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dist": "electron-builder"
+  },
+  "build": {
+    "appId": "com.yourname.desktop_pet",
+    "productName": "Desktop_pet",
+    "win": {
+      "target": "portable",
+      "icon": "app-icon.png"
+    },
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*",
+      "!node_modules/**/README*",
+      "!node_modules/**/*.md",
+      "!**/*.log",
+      "!convert-icon.js",
+      "!walkthrough.md",
+      "!*.png",
+      "!*.jpg",
+      "!*.ico"
+    ],
+    "npmRebuild": false
   },
   "keywords": [
     "electron",
@@ -22,6 +50,7 @@
     "pixi.js": "^7.4.3"
   },
   "devDependencies": {
-    "electron": "^40.6.0"
+    "electron": "^40.6.0",
+    "electron-builder": "^26.8.1"
   }
 }
